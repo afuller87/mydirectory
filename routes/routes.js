@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/users');
 const multer = require('multer');
+const fs =require('fs').promises;
 
 // image upload
 var storage = multer.diskStorage({
@@ -57,22 +58,88 @@ router.get('/add', (req, res) => {
 });
 
 // edit a user route
-router.get('/edit/:id', (req, res) => {
-    let id = req.params.id;
-    User.findById(id, (err, user) => {
-        if(err){
+router.get('/edit/:id', async (req, res) => {
+    try {
+        let id = req.params.id;
+        let user = await User.findById(id).exec();
+
+        if (user) {
+            res.render('edit_users', {
+                title: "Edit Users",
+                user: user,
+            });
+        } else {
             res.redirect('/');
-        } else{
-            if(user == null){
-                res.redirect('/');
-            } else{
-                res.render('edit_user', {
-                    title: "Edit User",
-                    user: user,
-                });
-            }
         }
-    }); 
+    } catch (err) {
+        res.redirect('/');
+    }
+});
+
+// update user route
+router.post('/update/:id', upload, async (req, res) => {
+    let id = req.params.id;
+    let new_image = '';
+
+    if (req.file) {
+        new_image = req.file.filename;
+        try {
+            fs.inlinkSync('./uploads/' + req.body.old_image);
+        } catch (err) {
+            console.log(err);
+        }
+    } else {
+        new_image = req.body.old_image;
+    }
+
+    try {
+        // find the existing user by ID
+        let user = await User.findById(id).exec();
+        
+        // update user properties
+        user.name = req.body.name;
+        user.email = req.body.email;
+        user.phone = req.body.phone;
+        
+        // handle the image upload
+        if (req.file) {
+            user.image = req.file.filename;
+        }
+
+        // save the updated user
+        await user.save();
+        req.session.message = {
+            type: 'success',
+            message: 'User updated successfully!',
+        };
+        res.redirect('/');
+
+    } catch (err) {
+        res.json({ message: err.message, type: 'danger' });
+    }
+});
+
+/// delete user route
+router.get('/delete/:id', async (req, res) => {
+    let id = req.params.id;
+    try {
+        let result = await User.findByIdAndDelete(id).exec();
+
+        // if there's an associated image, delete it from the filesystem
+        if (result.image) {
+            await fs.unlink('./uploads/' + result.image);
+        }
+
+        req.session.message = {
+            type: 'info',
+            message: 'User deleted successfully!'
+        };
+        res.redirect('/');
+
+    } catch (err) {
+        console.log(err); 
+        res.json({ message: err.message });
+    }
 });
 
 module.exports = router;

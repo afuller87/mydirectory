@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,7 +20,7 @@ app.use(express.json());
 
 app.use(session({
     secret: 'my secret key',
-    saveUnitialized: true,
+    saveUninitialized: true,
     resave: false,
 }));
 
@@ -33,6 +34,7 @@ app.use(express.static('uploads'));
 
 // set template engine
 app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
 // route prefix
 app.use('', require('./routes/routes'));
