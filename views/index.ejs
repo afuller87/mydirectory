@@ -3,32 +3,44 @@
 <div class="container">
     <div class="row my-4">
         <div class="col-lg-12">
+            <% if (message) { %>
+                <div class="alert alert-dismissible fade show alert-<%= message.type %>" role="alert">
+                    <button class="btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <strong><%= message.message %></strong>
+                </div>
+            <% } %>
             <div class="table-responsive">
-                <table class="table table-striped text-center">
-                    <thead>
-                        <tr class="table-dark">
-                            <th>City</th>
-                            <th>Image</th>
-                            <th>Name</th>
-                            <th>E-Mail</th>
-                            <th>Phone</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>St. Louis</td>
-                            <td><img src="" alt=""></td>
-                            <td>John Doe</td>
-                            <td>john.doe@gmail.com</td>
-                            <td>9876543210</td>
-                            <td>
-                                <a href="" class="text-sucess"><i class="fas fa-edit fa-lg mx-1"></i></a>
-                                <a href="" class="text-danger"><i class="fas fa-trash fa-lg mx-1"></i></a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <% if (users != '') { %>
+                    <table class="table table-striped text-center my-3">
+                        <thead>
+                            <tr class="table-dark">
+                                <th>ID</th>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>E-Mail</th>
+                                <th>Phone</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% users.forEach((row, index) => { %>
+                                <tr class="align-middle">
+                                    <td><%= index %></td>
+                                    <td><img src="<%= row.image %>" width="50" class="img-thumbnail" /></td>
+                                    <td><%= row.name %></td>
+                                    <td><%= row.email %></td>
+                                    <td><%= row.phone %></td>
+                                    <td>
+                                        <a href="/edit/<%= row._id %>" class="text-sucess"><i class="fas fa-edit fa-lg mx-1"></i></a>
+                                        <a href="/delete<%= row._id %>" class="text-danger"><i class="fas fa-trash fa-lg mx-1"></i></a>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                <% } else { %>
+                    <h1 class="text-center text-secondary mt-5">No users found in the database!</h1>
+                <% } %> 
             </div>
         </div>
     </div>
